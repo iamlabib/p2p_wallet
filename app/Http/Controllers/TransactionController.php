@@ -49,22 +49,30 @@ class TransactionController extends Controller
             $storeData['received_amount'] = $condersion_details['rate'] * $request->sent_amount;
             $storeData['stauts'] = 'sent';
             $storeData['converted_from'] = $condersion_details['data_source_url'];
-            $storeData['convertion_response'] = $condersion_details['response_collection'];
+            $storeData['convertion_response'] = json_encode($condersion_details['response_collection']);
         } else {
             $storeData['converted_from'] = '';
             $storeData['convertion_response'] = '';
             $storeData['convertion_rate'] = null;
             $storeData['received_amount'] = 0;
             $storeData['stauts'] = 'failed';
-        }
-                
-        dd(array_merge(
+        }            
+        Transaction::create(array_merge(
             $validator->validated(),
             $storeData,
         ));
-        $user = Transaction::create(array_merge(
-            $validator->validated(),
-            $storeData,
-        ));
+        // $commit_transaction = false;
+        // DB::beginTransaction();
+        // try {
+        //     Transaction::create(array_merge(
+        //         $validator->validated(),
+        //         $storeData,
+        //     ));
+        //     DB::commit();
+        //     $commit_transaction = true;
+        // } catch (\Throwable $e) {
+        //     DB::rollback();
+        // }  
+        
     }
 }

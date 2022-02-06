@@ -16,4 +16,8 @@ class ConversionLog extends Model
         'convertion_response',
         'convertion_rate',
     ];
+
+    public function user(){
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

@@ -1,11 +1,13 @@
 <?php 
 namespace App;
+
+use App\Models\ConversionLog;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 
 class Helpers
 {
-    public static function getCurrentRate($from, $to){
+    static public function getCurrentRate($from, $to){
         $url = 'http://api.currencylayer.com/live?access_key=8f5ffca1c972f0356b1844c21b0f57e9&format=1';
         $response = Http::get($url);
         if($response->successful() == true){
@@ -26,7 +28,7 @@ class Helpers
                         'response_header' => $response->headers(),
                         'response_collection' => $response->json(),                        
                     ]
-                );
+                );                
             } else {
                 $conversion_rate = collect(
                     [
@@ -40,8 +42,19 @@ class Helpers
                 );
             }
         }       
+        Helpers::storeLog($conversion_rate, $from, $to);
         return $conversion_rate;
     }
 
+    static private function storeLog($data, $from, $to){       
+        $storeData = array();
+            $storeData['user_id'] = auth()->user()->id;
+            $storeData['sent_currency'] = $from;
+            $storeData['received_currency'] = $to;
+            $storeData['convertion_rate'] = $data['rate'];
+            $storeData['converted_from'] = $data['data_source_url'];
+            $storeData['convertion_response'] = json_encode($data['response_collection']);
+            ConversionLog::create($storeData);        
+    }
 
 }
