@@ -5,19 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Transaction extends Model
+class ConversionLog extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'sender_id',
-        'receiver_id',
-        'sent_amount',
-        'received_amount',
+        'user_id',
         'sent_currency',
         'received_currency',
         'converted_from',
         'convertion_response',
         'convertion_rate',
-        'stauts'
     ];
 }

@@ -35,5 +35,6 @@ Route::group([
     'prefix' => 'transaction'
 
 ], function ($router) {
+    Route::post('/send', [TransactionController::class, 'send']);    
     Route::get('/rate', [TransactionController::class, 'index']);    
 });
