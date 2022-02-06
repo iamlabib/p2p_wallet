@@ -11,7 +11,7 @@ class Helpers
 {
     static public function getCurrentRate($from, $to){
 
-        $url = 'http://api.currencylayer.com/live?access_key=8f5ffca1c972f0356b1844c21b0f57e9&format=1';
+        $url = 'http://api.currencylayer.com/live?access_key='.env('CURRENCY_LAYER_KEY').'&format=1';
 
         $allowed_currency = array(
             'USD',
@@ -77,7 +77,7 @@ class Helpers
             $storeData['convertion_rate'] = $data['rate'];
             $storeData['converted_from'] = $data['data_source_url'];
             $storeData['convertion_response'] = json_encode($data['response_collection']);
-            ConversionLog::firstOrCreate($storeData);
+            ConversionLog::create($storeData);
             DB::commit();
         } catch (\Throwable $e) {
             DB::rollback();

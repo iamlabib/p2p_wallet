@@ -87,12 +87,15 @@ class TransactionController extends Controller
         }  
         if($commit_transaction == true){
             
+            // updating receiver wallet balance 
             $balance = $receiver->balance + $storeData['received_amount'];
             $receiver->balance = $balance;
             $receiver->save();
+
             // send email notification
             $message = "You received " . $receiver->base_currency . " " . $storeData['received_amount'] . " from " . $sender->email . ". Balance ". $receiver->base_currency ." " . $balance . ". Transaction ID " . $storeData['transaction_id'] . " at " . Carbon::now()->format('M, d Y H:i:s A');
             Helpers::sendEmail($receiver->email, $message);
+            
             return response()->json(array(
                 'success' => true,
                 'message' => 'Transaction successful',
@@ -106,6 +109,7 @@ class TransactionController extends Controller
             ), 200);
         }
     }
+    
     public function randomStr($length = 16) {
         $string = '';
         $is_unique = false;  
