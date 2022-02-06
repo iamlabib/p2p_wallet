@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Validator;
 class TransactionController extends Controller
 {
     public function __construct() {
-        $this->middleware('auth:api');
+        // $this->middleware('auth:api');
     }
 
     public function getRate($from, $to){   
@@ -109,7 +109,7 @@ class TransactionController extends Controller
             ), 200);
         }
     }
-    
+
     public function randomStr($length = 16) {
         $string = '';
         $is_unique = false;  

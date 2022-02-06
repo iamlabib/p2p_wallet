@@ -31,10 +31,10 @@ Route::group([
 });
 
 Route::group([
-    'middleware' => 'api',
+    'middleware' => 'auth:api',
     'prefix' => 'transaction'
 
 ], function ($router) {
-    Route::post('/send', [TransactionController::class, 'send']);    
-    Route::get('/rate/{from}/{to}', [TransactionController::class, 'getRate']);    
+    Route::post('/send', [TransactionController::class, 'send'])->name('transaction.send');    
+    Route::get('/rate/{from}/{to}', [TransactionController::class, 'getRate'])->name('conversion.rate');    
 });
