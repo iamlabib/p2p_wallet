@@ -5,6 +5,7 @@ use App\Models\ConversionLog;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class Helpers
 {
@@ -83,4 +84,10 @@ class Helpers
         }           
     }
 
+    static public function sendEmail($email, $data){
+        Mail::send('email.transactionConfirmation', ['data' => $data], function($message) use($email){
+            $message->to($email);
+            $message->subject('Transaction Alert!!!');
+        });          
+    }
 }

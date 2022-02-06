@@ -15,6 +15,7 @@ class CreateTransactionsTable extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->string('transaction_id', 200);
             $table->integer('sender_id');
             $table->integer('receiver_id');
             $table->double('sent_amount');

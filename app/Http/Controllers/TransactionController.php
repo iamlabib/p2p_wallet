@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Http;
 use App\Helpers;
 use App\Models\Transaction;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -55,6 +56,7 @@ class TransactionController extends Controller
         $condersion_details = Helpers::getCurrentRate($sender->base_currency, $receiver->base_currency);
 
         // setting the values 
+        $storeData['transaction_id'] = $this->randomStr(16);        
         $storeData['sender_id'] = $sender->id;        
         $storeData['sent_currency'] = $sender->base_currency;
         $storeData['received_currency'] = $receiver->base_currency;
@@ -71,20 +73,26 @@ class TransactionController extends Controller
             $storeData['received_amount'] = 0;
             $storeData['stauts'] = 'failed';
         }            
-
         $commit_transaction = false;
         DB::beginTransaction();
         try {
             Transaction::create(array_merge(
                 $validator->validated(),
                 $storeData,
-            ));
+            ));            
             DB::commit();
             $commit_transaction = true;
         } catch (\Throwable $e) {
             DB::rollback();
         }  
-        if($commit_transaction){
+        if($commit_transaction == true){
+            
+            $balance = $receiver->balance + $storeData['received_amount'];
+            $receiver->balance = $balance;
+            $receiver->save();
+            // send email notification
+            $message = "You received " . $receiver->base_currency . " " . $storeData['received_amount'] . " from " . $sender->email . ". Balance ". $receiver->base_currency ." " . $balance . ". Transaction ID " . $storeData['transaction_id'] . " at " . Carbon::now()->format('M, d Y H:i:s A');
+            Helpers::sendEmail($receiver->email, $message);
             return response()->json(array(
                 'success' => true,
                 'message' => 'Transaction successful',
@@ -97,5 +105,22 @@ class TransactionController extends Controller
                 'data' => null,
             ), 200);
         }
+    }
+    public function randomStr($length = 16) {
+        $string = '';
+        $is_unique = false;  
+        while (($len = strlen($string)) < $length) {
+            $size = $length - $len;
+                
+            $bytes = random_bytes($size);
+                
+            $string .= substr(str_replace(['/', '+', '='], '', base64_encode($bytes)), 0, $size);
+        }
+        while($is_unique == false){
+            if(!Transaction::where('transaction_id', $string)->first()){
+                $is_unique = true;
+            }
+        }
+        return $string;
     }
 }
