@@ -36,5 +36,5 @@ Route::group([
 
 ], function ($router) {
     Route::post('/send', [TransactionController::class, 'send']);    
-    Route::get('/rate', [TransactionController::class, 'index']);    
+    Route::get('/rate/{from}/{to}', [TransactionController::class, 'getRate']);    
 });

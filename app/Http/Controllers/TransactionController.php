@@ -6,6 +6,7 @@ use App\Helpers;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class TransactionController extends Controller
@@ -14,8 +15,21 @@ class TransactionController extends Controller
         $this->middleware('auth:api');
     }
 
-    public function index(){     
-        dd(Helpers::getCurrentRate('EUR', 'USD'));
+    public function getRate($from, $to){   
+        $response = Helpers::getCurrentRate($from, $to);
+        if($response['success']){
+            return response()->json(array(
+                'success' => true,
+                'message' => 'Conversion Rate',
+                'data' => $response,
+            ), 200);  
+        } else {
+            return response()->json(array(
+                'success' => false,
+                'message' => 'Conversion Rate',
+                'data' => null,
+            ), 200);  
+        }
     }
     
     public function send(Request $request){             
@@ -57,22 +71,31 @@ class TransactionController extends Controller
             $storeData['received_amount'] = 0;
             $storeData['stauts'] = 'failed';
         }            
-        Transaction::create(array_merge(
-            $validator->validated(),
-            $storeData,
-        ));
-        // $commit_transaction = false;
-        // DB::beginTransaction();
-        // try {
-        //     Transaction::create(array_merge(
-        //         $validator->validated(),
-        //         $storeData,
-        //     ));
-        //     DB::commit();
-        //     $commit_transaction = true;
-        // } catch (\Throwable $e) {
-        //     DB::rollback();
-        // }  
-        
+
+        $commit_transaction = false;
+        DB::beginTransaction();
+        try {
+            Transaction::create(array_merge(
+                $validator->validated(),
+                $storeData,
+            ));
+            DB::commit();
+            $commit_transaction = true;
+        } catch (\Throwable $e) {
+            DB::rollback();
+        }  
+        if($commit_transaction){
+            return response()->json(array(
+                'success' => true,
+                'message' => 'Transaction successful',
+                'data' => null,
+            ), 200);
+        } else {
+            return response()->json(array(
+                'success' => false,
+                'message' => 'Transaction failed',
+                'data' => null,
+            ), 200);
+        }
     }
 }
